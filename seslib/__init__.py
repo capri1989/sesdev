@@ -722,18 +722,22 @@ class Deployment():
                 fqdn = 'admin.{}'.format(self.settings.domain.format(self.dep_id))
             elif 'master' in node_roles:
                 master_id += 1
+                node_id += 1
                 name = 'master{}'.format(master_id)
                 fqdn = 'master{}.{}'.format(master_id, self.settings.domain.format(self.dep_id))
             elif 'worker' in node_roles:
                 worker_id += 1
+                node_id += 1
                 name = 'worker{}'.format(worker_id)
                 fqdn = 'worker{}.{}'.format(worker_id, self.settings.domain.format(self.dep_id))
             elif 'loadbalancer' in node_roles:
                 loadbl_id += 1
+                node_id += 1
                 name = 'loadbl{}'.format(loadbl_id)
                 fqdn = 'loadbl{}.{}'.format(loadbl_id, self.settings.domain.format(self.dep_id))
             elif 'storage' in node_roles and self.settings.version == 'caasp4':
                 storage_id += 1
+                node_id += 1
                 name = 'storage{}'.format(storage_id)
                 fqdn = 'storage{}.{}'.format(storage_id, self.settings.domain.format(self.dep_id))
             else:
