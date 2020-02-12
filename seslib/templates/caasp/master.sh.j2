@@ -150,6 +150,23 @@ EOF
 helm install --namespace metallb-system --name metallb stable/metallb -f ${MLBCONFIG}
 rm ${MLBCONFIG}
 
+
+
+{% if deploy_ses %}
+
+# deploy and configure rook + Ceph
+
+zypper -n in rook-k8s-yaml
+cd /usr/share/k8s-yaml/rook/ceph/
+kubectl apply -f common.yaml -f operator.yaml
+sleep 15
+kubectl apply -f cluster.yaml -f toolbox.yaml
+sleep 3
+kubectl apply -f cluster.yaml
+echo "Verify the installation by running 'kubectl get pods -n rook-ceph'"
+
+{% endif %}
+
 {% else %}
 
 touch /tmp/ready
