@@ -686,7 +686,7 @@ def ssh(deployment_id, node=None):
     _node = node
     if node is None:
         if dep.settings.version == 'caasp4':
-            _node = 'master'
+            _node = 'master1'
         else:
             _node = 'admin'
     dep.ssh(_node)
