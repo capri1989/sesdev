@@ -14,7 +14,7 @@ function wait_for_masters_ready {
 
 function wait_for_workers_ready {
     printf "Waiting for workers to be ready"
-    until [[ $(kubectl get nodes 2>/dev/null | egrep -c "worker[0-9]\s+Ready") -eq {node_manager.get_by_role('worker') | length}} ]]; do
+    until [[ $(kubectl get nodes 2>/dev/null | egrep -c "worker[0-9]\s+Ready") -eq {{node_manager.get_by_role('worker') | length}} ]]; do
          sleep 5
          printf "."
     done
