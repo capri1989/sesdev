@@ -82,6 +82,74 @@ wait_for_workers_ready
 skuba -v ${SKUBA_VERBOSITY} cluster status
 kubectl get nodes -o wide
 
+# setting up helm
+kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+helm init --service-account=tiller --wait
+
+# adding nfs storage class
+helm install --name=nfs-client --set nfs.server=storage1 --set nfs.path=/nfs --set storageClass.defaultClass=true stable/nfs-client-provisioner
+
+# Installing Kubernetes Dashboard
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-rc2/aio/deploy/recommended.yaml
+kubectl patch svc kubernetes-dashboard --type='json' -p '[{"op":"replace","path":"/spec/type","value":"NodePort"}]' -n kubernetes-dashboard
+
+cat >/tmp/dashboard-admin.yaml <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kube-system
+EOF
+
+kubectl apply -f /tmp/dashboard-admin.yaml
+
+cat >/tmp/admin-user-crb.yaml <<EOF
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: admin-user
+    namespace: kube-system
+EOF
+
+kubectl apply -f /tmp/admin-user-crb.yaml
+
+rm -f /tmp/dashboard-admin.yaml /tmp/admin-user-crb.yaml 2>/dev/null
+
+ST=$(kubectl -n kube-system get serviceaccounts admin-user -o jsonpath="{.secrets[0].name}")
+SECRET=$(kubectl -n kube-system get secret ${ST} -o jsonpath="{.data.token}"|base64 -d)
+export NODE_PORT=$(kubectl get -o jsonpath="{.spec.ports[0].nodePort}" services kubernetes-dashboard -n kubernetes-dashboard)
+export NODE_IP=$(kubectl get nodes -o jsonpath="{.items[0].status.addresses[0].address}" -n kubernetes-dashboard)
+
+echo "    token: $SECRET" >> ~/.kube/config
+echo "Access your dashboard at: https://$NODE_IP:$NODE_PORT/"
+echo "Your login token is: ${SECRET}"
+echo "Or use ~/.kube/config to authenticate with kubeconfig"
+
+# setting up MetalLB
+MLBCONFIG=/tmp/metallb.yaml
+
+kubectl create namespace metallb-system
+
+cat > ${MLBCONFIG} <<EOF
+configInline:
+  address-pools:
+  - name: default
+    protocol: layer2
+    addresses:
+    - 192.168.121.240-192.168.121.250
+EOF
+
+helm install --namespace metallb-system --name metallb stable/metallb -f ${MLBCONFIG}
+rm ${MLBCONFIG}
+
 {% else %}
 
 touch /tmp/ready
