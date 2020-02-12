@@ -142,7 +142,7 @@ helm install --namespace metallb-system --name metallb stable/metallb -f ${MLBCO
 rm ${MLBCONFIG}
 
 
-{% if deploy_ses is defined %}
+{% if caasp_deploy_ses %}
 
 # deploy and configure rook + Ceph
 

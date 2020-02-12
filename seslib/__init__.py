@@ -376,6 +376,11 @@ SETTINGS = {
         'help': 'Use `ceph-bootstrap deploy` command to run ceph-salt formula',
         'default': True
     },
+    'caasp_deploy_ses': {
+        'type': bool,
+        'help': 'Deploy SES using rook in CaasP',
+        'default': False
+    },
 }
 
 
@@ -898,7 +903,8 @@ class Deployment():
             'ceph_bootstrap_deploy_mgrs': self.settings.ceph_bootstrap_deploy_mgrs,
             'ceph_bootstrap_deploy_osds': self.settings.ceph_bootstrap_deploy_osds,
             'ceph_bootstrap_deploy': self.settings.ceph_bootstrap_deploy,
-            'node_manager': NodeManager(list(self.nodes.values()))
+            'node_manager': NodeManager(list(self.nodes.values())),
+            'caasp_deploy_ses': self.settings.caasp_deploy_ses,
         }
 
         scripts = {}
