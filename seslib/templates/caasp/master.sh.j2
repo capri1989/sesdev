@@ -151,7 +151,7 @@ cd /usr/share/k8s-yaml/rook/ceph/
 
 {% if node_manager.get_by_role('worker') | length <3 %}
 
-sed -i 's/allowMultiplePerNode: no/allowMultiplePerNode: yes/' cluster.yaml
+sed -i 's/allowMultiplePerNode: false/allowMultiplePerNode: true/' /usr/share/k8s-yaml/rook/ceph/cluster.yaml
 
 {% endif %}
 
