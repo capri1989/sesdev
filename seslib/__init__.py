@@ -102,6 +102,7 @@ VERSION_PREFERRED_OS = {
     'nautilus': 'leap-15.1',
     'octopus': 'leap-15.2',
     'caasp4': 'sles-15-sp1',
+    'rook': 'leap-15.2',
 }
 
 VERSION_PREFERRED_DEPLOYMENT_TOOL = {
@@ -163,6 +164,26 @@ VERSION_OS_REPO_MAPPING = {
             'standard/',
             'http://download.suse.de/ibs/SUSE:/SLE-15-SP1:/Update:/Products:/CASP40/standard/',
             'http://download.suse.de/ibs/SUSE/Products/SLE-Module-Containers/15-SP1/x86_64/product/'
+        ],
+    },
+    'rook': {
+        'leap-15.1': [
+            'https://download.opensuse.org/repositories/filesystems:/ceph:/octopus/'
+            'openSUSE_Leap_15.1',
+            'https://download.opensuse.org/tumbleweed/repo/oss/',
+            'http://download.opensuse.org/repositories/devel:/CaaSP:/Head:/ControllerNode/openSUSE_Tumbleweed/'
+        ],
+        'leap-15.2': [
+            'https://download.opensuse.org/repositories/filesystems:/ceph:/master:/upstream/'
+            'openSUSE_Leap_15.2',
+            'https://download.opensuse.org/tumbleweed/repo/oss/',
+            'http://download.opensuse.org/repositories/devel:/CaaSP:/Head:/ControllerNode/openSUSE_Tumbleweed/'
+        ],
+        'tumbleweed': [
+            'https://download.opensuse.org/repositories/filesystems:/ceph:/master:/upstream/'
+            'openSUSE_Tumbleweed',
+            'https://download.opensuse.org/tumbleweed/repo/oss/',
+            'http://download.opensuse.org/repositories/devel:/CaaSP:/Head:/ControllerNode/openSUSE_Tumbleweed/'
         ]
     }
 }
@@ -379,6 +400,11 @@ SETTINGS = {
     'caasp_deploy_ses': {
         'type': bool,
         'help': 'Deploy SES using rook in CaasP',
+        'default': False
+    },
+    'rook_deploy_ceph': {
+        'type': bool,
+        'help': 'Deploy Ceph using Rook',
         'default': False
     },
 }
@@ -631,7 +657,7 @@ class Deployment():
         if self.settings.os is None:
             self.settings.os = VERSION_PREFERRED_OS[self.settings.version]
 
-        if self.settings.deployment_tool is None and self.settings.version != 'caasp4':
+        if self.settings.deployment_tool is None and self.settings.version != 'caasp4' and self.settings.version != 'rook': 
             self.settings.deployment_tool = VERSION_PREFERRED_DEPLOYMENT_TOOL[self.settings.version]
 
         if self.settings.ceph_container_image is None:
@@ -905,6 +931,7 @@ class Deployment():
             'ceph_bootstrap_deploy': self.settings.ceph_bootstrap_deploy,
             'node_manager': NodeManager(list(self.nodes.values())),
             'caasp_deploy_ses': self.settings.caasp_deploy_ses,
+            'rook_deploy_ceph': self.settings.rook_deploy_ceph,
         }
 
         scripts = {}

@@ -1,0 +1,27 @@
+zypper -n install kubectl kubernetes-kubeadm docker rook
+iptables -I INPUT -j ACCEPT && iptables -P INPUT ACCEPT
+sysctl -w fs.file-max=1200000
+sysctl -w vm.swappiness=0
+systemctl enable docker.service
+systemctl start docker.service
+systemctl enable kubelet.service
+
+{% if node.has_role('admin') %}
+
+kubeadm init
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+export KUBECONFIG=$HOME/.kube/config
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+zypper -n install rook-k8s-yaml
+
+kubectl apply -f /usr/share/k8s-yaml/rook/ceph/common.yaml
+kubectl apply -f /usr/share/k8s-yaml/rook/ceph/operator.yaml
+#kubectl apply -f /usr/share/k8s-yaml/rook/ceph/cluster.yaml -f /usr/share/k8s-yaml/rook/ceph/toolbox.yaml
+
+echo "To check the current status of the deployment: 'kubectl -n rook-ceph get pod'"
+{% endif %} 

@@ -658,6 +658,23 @@ def caasp4(deployment_id, deploy, deploy_ses, **kwargs):
         settings_dict['caasp_deploy_ses'] = True
     _create_command(deployment_id, deploy, settings_dict)
 
+@create.command()
+@click.argument('deployment_id')
+@common_create_options
+@deepsea_options
+@ceph_bootstrap_options
+@libvirt_options
+@click.option("--deploy-ceph", is_flag=True, default=False,
+              help="Deploy Ceph using on the Rook cluster")
+def rook(deployment_id, deploy, deploy_ceph, **kwargs):
+    """
+    Creates a Rook cluster
+    """
+    settings_dict = _gen_settings_dict('rook', **kwargs)
+    if deploy_ceph:
+        settings_dict['rook_deploy_ceph'] = True
+    _create_command(deployment_id, deploy, settings_dict)
+
 
 @cli.command()
 @click.argument('deployment_id')
